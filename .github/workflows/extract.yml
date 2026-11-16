@@ -1,0 +1,27 @@
+name: Extract web build
+on:
+  push:
+    paths:
+      - 'pawgo-web.zip'
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract dist
+        run: |
+          rm -rf dist-extract
+          mkdir dist-extract
+          unzip -o pawgo-web.zip -d dist-extract
+          rm -rf index.html favicon.ico metadata.json _expo
+          cp -r dist-extract/dist/. .
+          rm -rf dist-extract pawgo-web.zip
+      - name: Commit extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy PawGo web (Supabase)" || echo "nothing to commit"
+          git push
